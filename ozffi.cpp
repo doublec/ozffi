@@ -218,6 +218,8 @@ void* getFFIValue(char const* type, OZ_Term Term)
   if(strcmp(type, "pointer") == 0) {
     if(OZ_isForeignPointer(Term))
       v->p = OZ_getForeignPointer(Term);
+    else if(OZ_isNil(Term))
+      v->p = 0;
   }
   else if(strcmp(type, "string") == 0) {
     int len = 0;
@@ -304,8 +306,12 @@ OZ_BI_define(BIcall,3,1)
     fn_t fn = (fn_t)OZ_getForeignPointer(Pointer);
     ffi_call(&cif, fn, &rc, values); 
     OZ_Term result;
-    if(strcmp(return_type, "pointer") == 0) 
-      result = OZ_makeForeignPointer(rc.p);
+    if(strcmp(return_type, "pointer") == 0)  {
+      if(rc.p == 0)
+	result = OZ_nil();
+      else
+	result = OZ_makeForeignPointer(rc.p);
+    }
     else if(strcmp(return_type, "string") == 0) 
       result = OZ_string((char*)rc.p);
     else if(strcmp(return_type, "void") == 0)
