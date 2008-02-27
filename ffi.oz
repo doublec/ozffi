@@ -70,6 +70,48 @@ define
 	    {FFI.bind F Name Fun}
 	    {FFI.call Fun Type [ A B C ] R}
 	 end
+      elseif NumArgs == 4 then
+	 proc {$ A B C D R}
+	    Fun
+	 in
+	    {FFI.bind F Name Fun}
+	    {FFI.call Fun Type [ A B C D ] R}
+	 end
+      elseif NumArgs == 5 then
+	 proc {$ A B C D E R}
+	    Fun
+	 in
+	    {FFI.bind F Name Fun}
+	    {FFI.call Fun Type [ A B C D E ] R}
+	 end
+      elseif NumArgs == 6 then
+	 proc {$ A B C D E F R}
+	    Fun
+	 in
+	    {FFI.bind F Name Fun}
+	    {FFI.call Fun Type [ A B C D E F ] R}
+	 end
+      elseif NumArgs == 7 then
+	 proc {$ A B C D E F G R}
+	    Fun
+	 in
+	    {FFI.bind F Name Fun}
+	    {FFI.call Fun Type [ A B C D E F G ] R}
+	 end
+      elseif NumArgs == 8 then
+	 proc {$ A B C D E F G H R}
+	    Fun
+	 in
+	    {FFI.bind F Name Fun}
+	    {FFI.call Fun Type [ A B C D E F G H ] R}
+	 end
+      elseif NumArgs == 9 then
+	 proc {$ A B C D E F G H I R}
+	    Fun
+	 in
+	    {FFI.bind F Name Fun}
+	    {FFI.call Fun Type [ A B C D E F G H I ] R}
+	 end
       end      	 
    end
 end
