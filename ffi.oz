@@ -39,78 +39,49 @@ define
       {Register F}
    end
 
-   fun {Bind F Name Type}
-      NumArgs = {Width Type.2}
+   fun {Bind F Name ReturnType ArgTypes}
+      NumArgs = {Length ArgTypes}
+      Fun = {FFI.bind F Name}
    in      
       if NumArgs == 0 then
 	 proc {$ R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type nil R}
+	    {FFI.call Fun ReturnType ArgTypes nil R}
 	 end
       elseif NumArgs == 1 then
 	 proc {$ A R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A ] R}
 	 end
       elseif NumArgs == 2 then
 	 proc {$ A B R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B ] R}
 	 end
       elseif NumArgs == 3 then
 	 proc {$ A B C R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C ] R}
 	 end
       elseif NumArgs == 4 then
 	 proc {$ A B C D R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C D ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C D ] R}
 	 end
       elseif NumArgs == 5 then
 	 proc {$ A B C D E R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C D E ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C D E ] R}
 	 end
       elseif NumArgs == 6 then
 	 proc {$ A B C D E F R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C D E F ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C D E F ] R}
 	 end
       elseif NumArgs == 7 then
 	 proc {$ A B C D E F G R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C D E F G ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C D E F G ] R}
 	 end
       elseif NumArgs == 8 then
 	 proc {$ A B C D E F G H R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C D E F G H ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C D E F G H ] R}
 	 end
       elseif NumArgs == 9 then
 	 proc {$ A B C D E F G H I R}
-	    Fun
-	 in
-	    {FFI.bind F Name Fun}
-	    {FFI.call Fun Type [ A B C D E F G H I ] R}
+	    {FFI.call Fun ReturnType ArgTypes [ A B C D E F G H I ] R}
 	 end
       end      	 
    end

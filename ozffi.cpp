@@ -271,33 +271,31 @@ void* getFFIValue(char const* type, OZ_Term Term)
   return v;
 }
 
-OZ_BI_define(BIcall,3,1)
+OZ_BI_define(FFI_call,4,1)
 {
   OZ_declareDetTerm(0, Pointer);
-  OZ_declareDetTerm(1, Definition);
-  OZ_declareDetTerm(2, Args);
+  OZ_declareDetTerm(1, ReturnType);
+  OZ_declareDetTerm(2, ArgTypes);
+  OZ_declareDetTerm(3, Values);
 
-  char const* call_type = strdup(OZ_atomToC(OZ_label(Definition)));
-  char const* return_type = strdup(OZ_atomToC(OZ_label(OZ_getArg(Definition, 0))));
-
-  OZ_Term Function = OZ_getArg(Definition, 1);
-  char const* function_name = strdup(OZ_atomToC(OZ_label(OZ_getArg(Function, 0))));
-  int number_args = OZ_width(Function);
+  char* return_type = strdup(OZ_atomToC(ReturnType));
+  int number_args = OZ_length(ArgTypes);
   
   ffi_cif cif;
   ffi_type* args[number_args];
   void* values[number_args];
-  OZ_Term cons = Args;
+  OZ_Term valueCons = Values;
+  OZ_Term typeCons = ArgTypes;
   int i = 0;
-  while(OZ_isCons(cons)) {
-    OZ_Term hd = OZ_head(cons);
-    char* type = strdup(OZ_atomToC(OZ_getArg(Function, i)));
+  while(OZ_isCons(valueCons) && OZ_isCons(typeCons)) {
+    char* type = strdup(OZ_atomToC(OZ_head(typeCons)));
     args[i] = getFFIType(type);
-    values[i] = getFFIValue(type, hd);
+    values[i] = getFFIValue(type, OZ_head(valueCons));
     free(type);
 
     ++i;
-    cons = OZ_tail(cons);    
+    valueCons = OZ_tail(valueCons);    
+    typeCons = OZ_tail(typeCons);
   }  
 
   if(ffi_prep_cif(&cif, FFI_DEFAULT_ABI, i, getFFIType(return_type), args) == FFI_OK) {
@@ -338,8 +336,10 @@ OZ_BI_define(BIcall,3,1)
       result = OZ_float(rc.d);
 
     OZ_out(0) = result;
+    free(return_type);
     return OZ_ENTAILED;
   }
+  free(return_type);
   return OZ_FAILED;
 } OZ_BI_end
 
@@ -370,7 +370,7 @@ static OZ_C_proc_interface oz_interface[] = {
   { "bind", 2, 1, FFI_bind },
   { "unload", 1, 0, FFI_unload },
   { "is", 1, 1, FFI_is },
-  { "call", 3, 1, BIcall },
+  { "call", 4, 1, FFI_call },
   { "findFunction", 2, 1, BIfindFunction },
   { 0,0,0,0}
 };
