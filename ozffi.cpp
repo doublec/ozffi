@@ -329,7 +329,7 @@ OZ_BI_define(BIcall,3,1)
     else if(strcmp(return_type, "float") == 0)
       result = OZ_float(rc.f);
     else if(strcmp(return_type, "double") == 0)
-      result = OZ_float(rc.f);
+      result = OZ_float(rc.d);
 
     OZ_out(0) = result;
     return OZ_ENTAILED;
