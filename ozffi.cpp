@@ -5,6 +5,142 @@
 #include <malloc.h>
 #include <dlfcn.h>
 
+class FFI : public OZ_Extension {
+public:
+  static int id;
+  void* handle;
+
+  FFI() : handle(0) { }
+  bool load(char const* name);
+  void* bind(char const* name);
+  bool unload();
+
+  // OZ_Extension requirements
+  virtual int getIdV();
+  virtual OZ_Extension* gCollectV();
+  virtual OZ_Extension* sCloneV();
+  virtual void gCollectRecurseV();
+  virtual void sCloneRecurseV();
+  virtual OZ_Term typeV();
+};
+
+int FFI::id;
+
+bool FFI::load(char const* name)
+{
+  handle = dlopen(name, RTLD_NOW | RTLD_GLOBAL);
+  return handle;
+}
+
+void* FFI::bind(char const* name)
+{
+  if(!handle)
+    return 0;
+
+  void* func = dlsym(handle, name);
+  if(!func)
+    return 0;
+
+  return func;
+}
+
+bool FFI::unload()
+{
+  if(handle) {
+    dlclose(handle);
+    handle = 0;
+  }   
+}
+
+int FFI::getIdV()
+{
+  return id;
+}
+
+OZ_Extension* FFI::gCollectV()
+{
+  return new FFI(*this);
+}
+
+OZ_Extension* FFI::sCloneV()
+{
+  return 0;
+}
+
+void FFI::gCollectRecurseV()
+{
+}
+
+void FFI::sCloneRecurseV()
+{
+}
+
+OZ_Term FFI::typeV()
+{
+  return OZ_atom("FFI");
+}
+
+
+OZ_Boolean OZ_isFFI(OZ_Term t)
+{
+  t = OZ_deref(t);
+  return OZ_isExtension(t) &&
+    OZ_getExtension(t)->getIdV()==FFI::id;
+}
+
+FFI* OZ_FFIToC(OZ_Term t)
+{
+  return (FFI*)OZ_getExtension(OZ_deref(t));
+}
+
+#define OZ_declareFFI(ARG, VAR) \
+  OZ_declareType(ARG,VAR,FFI*,"FFI",OZ_isFFI,OZ_FFIToC)
+
+OZ_BI_define(FFI_load,1,1)
+{
+  OZ_declareDetTerm(0, Name);
+  FFI* ffi = new FFI();
+  int len = 0;
+  if(ffi->load(OZ_isNil(Name) ? 0 : OZ_stringToC(Name, &len))) {
+    OZ_RETURN(OZ_extension(ffi));
+  }
+  else {
+    delete ffi;
+    return OZ_FAILED;
+  }
+}
+OZ_BI_end
+
+OZ_BI_define(FFI_bind,2,1)
+{
+  OZ_declareFFI(0, ffi);
+  OZ_declareDetTerm(1, Name);
+
+  int len = 0;
+  void* func = ffi->bind(OZ_stringToC(Name, &len));
+  if(!func)
+    return OZ_FAILED;
+
+  OZ_out(0) = OZ_makeForeignPointer(func);
+  return OZ_ENTAILED;
+}
+OZ_BI_end
+
+OZ_BI_define(FFI_unload,1,0)
+{
+  OZ_declareFFI(0, ffi);
+  ffi->unload();
+  return PROCEED;
+}
+OZ_BI_end
+
+OZ_BI_define(FFI_is,1,1)
+{
+  OZ_declareDetTerm(0,t);
+  OZ_RETURN_BOOL(OZ_isFFI(t));
+}
+OZ_BI_end
+
 ffi_type* getFFIType(char const* name) 
 {
   if(strcmp(name, "pointer") == 0)
@@ -201,11 +337,16 @@ OZ_BI_define(BIfindFunction,2,1)
 } OZ_BI_end
 
 static OZ_C_proc_interface oz_interface[] = {
+  { "load", 1, 1, FFI_load },
+  { "bind", 2, 1, FFI_bind },
+  { "unload", 1, 0, FFI_unload },
+  { "is", 1, 1, FFI_is },
   { "call", 3, 1, BIcall },
   { "findFunction", 2, 1, BIfindFunction },
   { 0,0,0,0}
 };
 
 OZ_C_proc_interface *oz_init_module() {
+  FFI::id = OZ_getUniqueId();
   return oz_interface;
 }

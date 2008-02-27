@@ -1,11 +1,7 @@
-declare
-[FFI]={Module.link ['ozffi.so{native}']}
-
-declare GetEnv = {FFI.findFunction nil 'getenv'}
-{Browse GetEnv}
-declare Puts = {FFI.findFunction nil 'puts'}
-{Browse Puts}
+declare [FFI]={Module.link ['ffi.ozf']}
+declare Std = {FFI.load nil}
+declare GetEnv = {FFI.bind Std "getenv"}
 {Browse {FFI.call GetEnv stdcall(string getenv(string)) ["OZHOME"]}}
+
+declare Puts = {FFI.bind Std "puts"}
 {Browse {FFI.call Puts stdcall(uint32 getenv(string)) ["OZHOME"]}}
-{Browse "hello"}
-{Browse [ 1 2 3 ] }
